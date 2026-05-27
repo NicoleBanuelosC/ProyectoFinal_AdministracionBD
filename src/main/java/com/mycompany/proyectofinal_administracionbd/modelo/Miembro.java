@@ -20,6 +20,14 @@ public class Miembro {
     private Date fechaIngreso;
     private boolean cuotaPagada;
     private int anoCuota;
+    private String calle;
+    private String numeroExt;
+    private String numeroInt;
+    private String colonia;
+    private String ciudad;
+    private String estado;
+    private String codigoPostal;
+    private String pais;
 
     public Miembro() {}
 
@@ -50,5 +58,28 @@ public class Miembro {
     public int getAnoCuota() { return anoCuota; }
     public void setAnoCuota(int anoCuota) { this.anoCuota = anoCuota; }
 
+        public String getCalle() { return calle; }
+    public void setCalle(String calle) { this.calle = calle; }
+    
+    public String getNumeroExt() { return numeroExt; }
+    public void setNumeroExt(String numeroExt) { this.numeroExt = numeroExt; }
+    
+    public String getNumeroInt() { return numeroInt; }
+    public void setNumeroInt(String numeroInt) { this.numeroInt = numeroInt; }
+    
+    public String getColonia() { return colonia; }
+    public void setColonia(String colonia) { this.colonia = colonia; }
+    
+    public String getCiudad() { return ciudad; }
+    public void setCiudad(String ciudad) { this.ciudad = ciudad; }
+    
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
+    
+    public String getCodigoPostal() { return codigoPostal; }
+    public void setCodigoPostal(String codigoPostal) { this.codigoPostal = codigoPostal; }
+    
+    public String getPais() { return pais; }
+    public void setPais(String pais) { this.pais = pais; }
     
 }//Miemrbo
