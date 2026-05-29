@@ -18,7 +18,7 @@ import java.util.List;
  *
  * @author banue
  */
-public class MiembroDAOImpl {
+public class MiembroDAOImpl implements MiembroDAO{
     
     public boolean guardar(Miembro m) throws Exception {
         String sql = "{CALL sp_registrar_miembro_completo(?,?,?,?,?,?,?,?,?,?,?,?,?)}";
