@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
+import com.mycompany.proyectofinal_administracionbd.vista.ReportesGraficasVista;
 
 /**
  *
@@ -266,7 +267,7 @@ public class MenuPrincipal extends JFrame{
 
         btnReportes.addActionListener(e -> {
             pnlContenido.removeAll();
-            pnlContenido.add(new ReportesVista(), BorderLayout.CENTER);
+            pnlContenido.add(new ReportesGraficasVista(), BorderLayout.CENTER); 
             pnlContenido.revalidate();
             pnlContenido.repaint();
             actualizarHeader("Reportes y Gráficas");

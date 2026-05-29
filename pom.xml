@@ -2,6 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" 
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
     <modelVersion>4.0.0</modelVersion>
     
     <groupId>com.mycompany</groupId>
@@ -15,16 +16,33 @@
         <exec.mainClass>com.mycompany.proyectofinal_administracionbd.ProyectoFinal_AdministracionBD</exec.mainClass>
     </properties>
     
-    <!--aqui va el driver del postgres-->
+    <!--  drivers y las librerías para gráficas/reportes -->
     <dependencies>
-        <!-- PostgreSQL JDBC Driver -->
+        
+        <!-- postgreSQL JDBC Driver (para la conexion bd) -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.7.4</version>
         </dependency>
+        
+        <!-- JFreeChart (gráficas) -->
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.5.3</version>
+        </dependency>
+        
+        <!-- JasperReports (Reportes en pdf) -->
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>6.20.0</version>
+        </dependency>
+        
     </dependencies>
     
+    <!-- configuración de compilación -->
     <build>
         <plugins>
             <plugin>
@@ -37,4 +55,5 @@
             </plugin>
         </plugins>
     </build>
+    
 </project>
