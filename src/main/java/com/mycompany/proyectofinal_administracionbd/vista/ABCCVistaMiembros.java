@@ -109,16 +109,24 @@ public class ABCCVistaMiembros extends JPanel{
         cmbAño.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         cmbAño.setMaximumSize(new Dimension(280, 30));
 
-        JPanel pnlBtn = new JPanel(new GridLayout(4, 1, 8, 8));
+        // === PANEL DE BOTONES CON ESTILO PASTEL ===
+        JPanel pnlBtn = new JPanel(new GridLayout(4, 1, 10, 10));
         pnlBtn.setBackground(Color.WHITE);
-        pnlBtn.setBorder(new EmptyBorder(15, 0, 0, 0));
-        
-        JButton btnGuardar = crearBoton("💾 Guardar / Actualizar", new Color(46, 204, 113));
-        JButton btnEliminar = crearBoton("🗑️ Dar de Baja", new Color(231, 76, 60));
-        JButton btnLimpiar = crearBoton("🧹 Limpiar Formulario", new Color(149, 165, 166));
-        JButton btnVolver = crearBoton("⬅️ Volver al Menú", new Color(52, 152, 219));
+        pnlBtn.setBorder(new EmptyBorder(20, 0, 0, 0));
 
-        pnlBtn.add(btnGuardar); pnlBtn.add(btnEliminar); 
+        // Paleta pastel + texto oscuro para contraste
+        Color pastelVerde = new Color(168, 230, 207); // Guardar
+        Color pastelRojo  = new Color(255, 190, 195); // Eliminar
+        Color pastelAzul  = new Color(195, 225, 255); // Volver
+        Color pastelGris  = new Color(235, 235, 240); // Limpiar
+        Color textoOscuro = new Color(45, 55, 65);    // Contraste perfecto
+
+        JButton btnGuardar = crearBotonPastel("💾 Guardar / Actualizar", pastelVerde, textoOscuro);
+        JButton btnEliminar = crearBotonPastel("🗑️ Dar de Baja", pastelRojo, textoOscuro);
+        JButton btnLimpiar  = crearBotonPastel("🧹 Limpiar Formulario", pastelGris, textoOscuro);
+        JButton btnVolver   = crearBotonPastel("️ Volver al Menú", pastelAzul, textoOscuro);
+
+        pnlBtn.add(btnGuardar); pnlBtn.add(btnEliminar);
         pnlBtn.add(btnLimpiar); pnlBtn.add(btnVolver);
 
         pnlForm.add(Box.createVerticalStrut(5));
@@ -320,5 +328,31 @@ public class ABCCVistaMiembros extends JPanel{
         chkCuotaPagada.setSelected(false); cmbAño.setSelectedIndex(0);
         txtNombre.requestFocus();
     }//limpiarForm
- 
+    
+    //metodo nomas para crear botones con colores pastelito
+    private JButton crearBotonPastel(String texto, Color colorBase, Color colorTexto) {
+        JButton btn = new JButton(texto);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btn.setBackground(colorBase);
+        btn.setForeground(colorTexto);
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setMaximumSize(new Dimension(280, 38));
+        btn.setOpaque(true);
+
+        btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                btn.setBackground(colorBase.darker());
+            }//mouseEntered
+            
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                btn.setBackground(colorBase);
+            }//mouseExited
+            
+        });
+        return btn;
+        
+    }//crearBotonPastel
+
 }//ABCCMiembros
