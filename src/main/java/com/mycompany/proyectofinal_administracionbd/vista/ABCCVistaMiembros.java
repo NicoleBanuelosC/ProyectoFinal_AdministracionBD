@@ -24,32 +24,35 @@ public class ABCCVistaMiembros extends JPanel{
     private final DefaultTableModel modeloTabla;
     private final JTable tblMiembros;
     
+    // Campos del formulario
     private JTextField txtId, txtNombre, txtApellido, txtEmail, txtTelefono;
     private JTextField txtCalle, txtNumeroExt, txtColonia, txtCiudad, txtEstado, txtCP;
     private JCheckBox chkCuotaPagada;
-    private JComboBox<String> cmbAño;   
-    
+    private JComboBox<String> cmbAño;
+
     public ABCCVistaMiembros() {
         setLayout(new BorderLayout(10, 10));
         setBackground(Color.WHITE);
         setBorder(new EmptyBorder(15, 15, 15, 15));
         
         miembroDAO = new MiembroDAOImpl();
-        modeloTabla = new DefaultTableModel(
-            new String[]{"ID", "Nombre", "Apellido", "Email", "Teléfono", "Cuota", "Año"}, 0);
+        
+        // encabezados de la tabla
+        String[] columnas = {"ID", "Nombre", "Apellido", "Email", "Teléfono", "Cuota", "Año"};
+        modeloTabla = new DefaultTableModel(columnas, 0);
         tblMiembros = new JTable(modeloTabla);
         
         construirInterfaz();
-        configurarTAB(); 
+        configurarTAB();
         cargarDatos();
-    }//abccVistaM
-    
-      private void construirInterfaz() {
+    }
+
+    private void construirInterfaz() {
         JPanel pnlTabla = new JPanel(new BorderLayout());
         pnlTabla.setBackground(Color.WHITE);
         pnlTabla.setBorder(new TitledBorder(
             new LineBorder(new Color(41, 128, 185), 2), 
-            "Lista de Miembros", 
+            "📋 Lista de Miembros", 
             TitledBorder.LEFT, TitledBorder.TOP, 
             new Font("Segoe UI", Font.BOLD, 13), new Color(41, 128, 185)));
 
@@ -63,84 +66,133 @@ public class ABCCVistaMiembros extends JPanel{
         
         pnlTabla.add(new JScrollPane(tblMiembros), BorderLayout.CENTER);
 
-        // === altas, bajas, cambios ===
         JPanel pnlForm = new JPanel();
         pnlForm.setBackground(Color.WHITE);
-        pnlForm.setPreferredSize(new Dimension(320, 600));
+        pnlForm.setPreferredSize(new Dimension(340, 600));
         pnlForm.setLayout(new BoxLayout(pnlForm, BoxLayout.Y_AXIS));
         pnlForm.setBorder(new TitledBorder(
             new LineBorder(new Color(46, 204, 113), 2), 
-            "Gestión de Miembro", 
+            "✏️ Gestión de Miembro", 
             TitledBorder.LEFT, TitledBorder.TOP, 
             new Font("Segoe UI", Font.BOLD, 13), new Color(46, 204, 113)));
 
-        // crear campos
-        txtId = crearCampo("ID (Auto)", false);
-        txtNombre = crearCampo("Nombre *", true);
-        txtApellido = crearCampo("Apellido *", true);
-        txtEmail = crearCampo("Email *", true);
-        txtTelefono = crearCampo("Teléfono (10 dígitos)", true);
-        txtCalle = crearCampo("Calle *", true);
-        txtNumeroExt = crearCampo("Número Ext. *", true);
-        txtColonia = crearCampo("Colonia *", true);
-        txtCiudad = crearCampo("Ciudad *", true);
-        txtEstado = crearCampo("Estado *", true);
-        txtCP = crearCampo("C.P. *", true);
+        // id
+        pnlForm.add(crearLabel("ID (Auto-generado)"));
+        txtId = crearCampoTexto(false);
+        pnlForm.add(txtId);
 
-        // validación
+        pnlForm.add(crearLabel("Nombre *"));
+        txtNombre = crearCampoTexto(true);
+        txtNombre.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                // Solo permite letras, espacios, acentos, ñ y borrar
+                if (!Character.isLetter(c) && !Character.isSpaceChar(c) && 
+                    "áéíóúÁÉÍÓÚñÑ".indexOf(c) == -1 && c != KeyEvent.VK_BACK_SPACE) {
+                    e.consume();
+                }//if
+            }//voud
+            
+        });
+        pnlForm.add(txtNombre);
+
+        pnlForm.add(crearLabel("Apellido *"));
+        txtApellido = crearCampoTexto(true);
+        txtApellido.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                if (!Character.isLetter(c) && !Character.isSpaceChar(c) && 
+                    "áéíóúÁÉÍÓÚñÑ".indexOf(c) == -1 && c != KeyEvent.VK_BACK_SPACE) {
+                    e.consume();
+                }//if
+            }//void
+        });
+        pnlForm.add(txtApellido);
+
+        pnlForm.add(crearLabel("Email *"));
+        txtEmail = crearCampoTexto(true);
+        pnlForm.add(txtEmail);
+
+        pnlForm.add(crearLabel("Teléfono (10 dígitos)"));
+        txtTelefono = crearCampoTexto(true);
         txtTelefono.addKeyListener(new KeyAdapter() {
             public void keyTyped(KeyEvent e) {
                 char c = e.getKeyChar();
                 if (!Character.isDigit(c) && c != KeyEvent.VK_BACK_SPACE) e.consume();
-            }//public void
+            }//public
         });
+        pnlForm.add(txtTelefono);
+
+        pnlForm.add(Box.createVerticalStrut(10));
+        JLabel lblDir = new JLabel("📍 Dirección Completa");
+        lblDir.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblDir.setForeground(new Color(52, 73, 94));
+        pnlForm.add(lblDir);
+        pnlForm.add(Box.createVerticalStrut(5));
+
+        pnlForm.add(crearLabel("Calle *"));
+        txtCalle = crearCampoTexto(true);
+        pnlForm.add(txtCalle);
+
+        pnlForm.add(crearLabel("Número Exterior *"));
+        txtNumeroExt = crearCampoTexto(true);
+        pnlForm.add(txtNumeroExt);
+
+        pnlForm.add(crearLabel("Colonia *"));
+        txtColonia = crearCampoTexto(true);
+        pnlForm.add(txtColonia);
+
+        pnlForm.add(crearLabel("Ciudad *"));
+        txtCiudad = crearCampoTexto(true);
+        pnlForm.add(txtCiudad);
+
+        pnlForm.add(crearLabel("Estado *"));
+        txtEstado = crearCampoTexto(true);
+        pnlForm.add(txtEstado);
+
+        pnlForm.add(crearLabel("C.P. *"));
+        txtCP = crearCampoTexto(true);
         txtCP.addKeyListener(new KeyAdapter() {
             public void keyTyped(KeyEvent e) {
                 char c = e.getKeyChar();
                 if (!Character.isDigit(c) && c != KeyEvent.VK_BACK_SPACE) e.consume();
-            }//public void
+            }//void
         });
+        pnlForm.add(txtCP);
 
+        pnlForm.add(Box.createVerticalStrut(10));
         chkCuotaPagada = new JCheckBox("Cuota pagada ($50/año)");
         chkCuotaPagada.setFont(new Font("Segoe UI", Font.BOLD, 12));
         chkCuotaPagada.setBackground(Color.WHITE);
+        pnlForm.add(chkCuotaPagada);
 
+        pnlForm.add(crearLabel("Año de cuota:"));
         cmbAño = new JComboBox<>(new String[]{"2024", "2025", "2026"});
         cmbAño.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         cmbAño.setMaximumSize(new Dimension(280, 30));
+        pnlForm.add(cmbAño);
 
-        // === PANEL DE BOTONES CON ESTILO PASTEL ===
         JPanel pnlBtn = new JPanel(new GridLayout(4, 1, 10, 10));
         pnlBtn.setBackground(Color.WHITE);
         pnlBtn.setBorder(new EmptyBorder(20, 0, 0, 0));
 
-        // Paleta pastel + texto oscuro para contraste
-        Color pastelVerde = new Color(168, 230, 207); // Guardar
-        Color pastelRojo  = new Color(255, 190, 195); // Eliminar
-        Color pastelAzul  = new Color(195, 225, 255); // Volver
-        Color pastelGris  = new Color(235, 235, 240); // Limpiar
-        Color textoOscuro = new Color(45, 55, 65);    // Contraste perfecto
+        Color pastelVerde = new Color(168, 230, 207);
+        Color pastelRojo  = new Color(255, 190, 195);
+        Color pastelAzul  = new Color(195, 225, 255);
+        Color pastelGris  = new Color(235, 235, 240);
+        Color textoOscuro = new Color(45, 55, 65);
 
         JButton btnGuardar = crearBotonPastel("💾 Guardar / Actualizar", pastelVerde, textoOscuro);
         JButton btnEliminar = crearBotonPastel("🗑️ Dar de Baja", pastelRojo, textoOscuro);
         JButton btnLimpiar  = crearBotonPastel("🧹 Limpiar Formulario", pastelGris, textoOscuro);
-        JButton btnVolver   = crearBotonPastel("️ Volver al Menú", pastelAzul, textoOscuro);
+        JButton btnVolver   = crearBotonPastel("⬅️ Volver al Menú", pastelAzul, textoOscuro);
 
         pnlBtn.add(btnGuardar); pnlBtn.add(btnEliminar);
         pnlBtn.add(btnLimpiar); pnlBtn.add(btnVolver);
 
-        pnlForm.add(Box.createVerticalStrut(5));
-        pnlForm.add(txtId); pnlForm.add(txtNombre); pnlForm.add(txtApellido);
-        pnlForm.add(txtEmail); pnlForm.add(txtTelefono);
-        pnlForm.add(Box.createVerticalStrut(10));
-        pnlForm.add(new JLabel("📍 Dirección Completa"));
-        pnlForm.add(txtCalle); pnlForm.add(txtNumeroExt); 
-        pnlForm.add(txtColonia); pnlForm.add(txtCiudad); 
-        pnlForm.add(txtEstado); pnlForm.add(txtCP);
-        pnlForm.add(Box.createVerticalStrut(10));
-        pnlForm.add(chkCuotaPagada); pnlForm.add(cmbAño);
         pnlForm.add(Box.createVerticalStrut(15));
-        pnlForm.add(pnlBtn); pnlForm.add(Box.createVerticalGlue());
+        pnlForm.add(pnlBtn);
+        pnlForm.add(Box.createVerticalGlue());
 
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, pnlTabla, pnlForm);
         split.setDividerLocation(650);
@@ -148,7 +200,7 @@ public class ABCCVistaMiembros extends JPanel{
         split.setContinuousLayout(true);
         add(split, BorderLayout.CENTER);
 
-        //eventos de botones
+        // Eventos
         btnGuardar.addActionListener(e -> guardarOActualizar());
         btnEliminar.addActionListener(e -> eliminar());
         btnLimpiar.addActionListener(e -> limpiarFormulario());
@@ -156,19 +208,28 @@ public class ABCCVistaMiembros extends JPanel{
             if (getParent() instanceof JFrame f) { 
                 f.dispose(); 
                 new MenuPrincipal().setVisible(true); 
-            }//if
+            }
         });
         
-        // doble click en tabla para carga datos
         tblMiembros.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) { 
                 if (e.getClickCount() == 2) cargarFilaSeleccionada(); 
-            }//public void
+            }//if
         });
-    }//construirInterfaz
+    }//cponstruirInterfaz
 
-    // método extra para creae campo
-    private JTextField crearCampo(String placeholder, boolean editable) {
+    //Métodos extra - auxiliares
+    
+    private JLabel crearLabel(String texto) {
+        JLabel lbl = new JLabel(texto);
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lbl.setForeground(new Color(52, 73, 94));
+        lbl.setMaximumSize(new Dimension(280, 20));
+        return lbl;
+    }//crearLabel
+
+    //rear campo de texto
+    private JTextField crearCampoTexto(boolean editable) {
         JTextField txt = new JTextField();
         txt.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         txt.setBorder(BorderFactory.createCompoundBorder(
@@ -176,33 +237,31 @@ public class ABCCVistaMiembros extends JPanel{
             new EmptyBorder(6, 8, 6, 8)));
         txt.setMaximumSize(new Dimension(280, 32));
         txt.setEditable(editable);
-        txt.putClientProperty("JTextField.placeholderText", placeholder);
         return txt;
-    }//crearCampo
+    }//crearCampoTexto
 
-    // método extra para crear botones 
-    private JButton crearBoton(String texto, Color color) {
+    //botones pastel
+    private JButton crearBotonPastel(String texto, Color colorBase, Color colorTexto) {
         JButton btn = new JButton(texto);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        btn.setBackground(color); 
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false); 
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btn.setBackground(colorBase);
+        btn.setForeground(colorTexto);
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setMaximumSize(new Dimension(280, 35));
-
+        btn.setMaximumSize(new Dimension(280, 38));
+        btn.setOpaque(true);
         btn.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) { btn.setBackground(color.brighter()); }
-            public void mouseExited(MouseEvent e) { btn.setBackground(color); }
+            public void mouseEntered(MouseEvent e) { btn.setBackground(colorBase.darker()); }
+            public void mouseExited(MouseEvent e) { btn.setBackground(colorBase); }
         });
         return btn;
-    }//crearBron
+    }//botenesPastel
 
     private void configurarTAB() {
-        // El orden de add() al contenedor define el orden de TAB
-        // Ya está configurado en construirInterfaz()
-    }//configuracionTab
+        // El orden de add() define el orden de TAB
+    }//ConfigurarTAB
 
-    // cargar datos del DAO a la tabla
     private void cargarDatos() {
         try {
             modeloTabla.setRowCount(0);
@@ -210,42 +269,75 @@ public class ABCCVistaMiembros extends JPanel{
                 modeloTabla.addRow(new Object[]{
                     m.getIdMiembro(), m.getNombre(), m.getPrimerApellido(),
                     m.getEmail(), m.getTelefono(),
-                    m.isCuotaPagada() ? "✅" : "❌", m.getAnoCuota()
+                    m.isCuotaPagada() ? "✅ Sí" : "❌ No", m.getAnoCuota()
                 });
-            }//Fir
+            }//for
             
         } catch (Exception ex) { 
             JOptionPane.showMessageDialog(this, "Error al cargar: " + ex.getMessage()); 
         }//Catch
+        
     }//CargarDatos
 
+    // validar datos
     private boolean validarCampos() {
+        // 1 - los campos obligatorios
         if (txtNombre.getText().trim().isEmpty() || txtApellido.getText().trim().isEmpty() || 
             txtEmail.getText().trim().isEmpty() || txtCalle.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, 
-                "⚠️ Los campos marcados con * son obligatorios.", 
-                "Validación", JOptionPane.WARNING_MESSAGE);
+                "⚠️ Los campos con * son obligatorios.", "Validación", JOptionPane.WARNING_MESSAGE);
             return false;
         }//if
         
+        // 2 - validar que el nombre solo tenga letras, espacios y acentos
+        if (!txtNombre.getText().trim().matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$")) {
+            JOptionPane.showMessageDialog(this, 
+                "⚠️ El nombre solo debe contener letras.\nNo se permiten números ni caracteres especiales.", 
+                "Validación", JOptionPane.WARNING_MESSAGE);
+            txtNombre.requestFocus();
+            return false;
+        }//if
+        
+        // 3 - validar que apellido solo tenga letras, espacios y acentos
+        if (!txtApellido.getText().trim().matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$")) {
+            JOptionPane.showMessageDialog(this, 
+                "⚠️ El apellido solo debe contener letras.\nNo se permiten números ni caracteres especiales.", 
+                "Validación", JOptionPane.WARNING_MESSAGE);
+            txtApellido.requestFocus();
+            return false;
+        }//if
+        
+        // 4 - validar el email
         if (!txtEmail.getText().trim().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
             JOptionPane.showMessageDialog(this, 
-                "⚠️ Formato de email inválido.", 
+                "⚠️ Formato de email inválido (ej: usuario@dominio.com).", 
                 "Validación", JOptionPane.WARNING_MESSAGE);
+            txtEmail.requestFocus();
             return false;
         }//if
         
+        // 5 - validar telefono 
         if (txtTelefono.getText().trim().length() != 10) {
             JOptionPane.showMessageDialog(this, 
-                "El teléfono debe tener 10 dígitos.", 
+                "⚠️ El teléfono debe tener exactamente 10 dígitos.", 
                 "Validación", JOptionPane.WARNING_MESSAGE);
+            txtTelefono.requestFocus();
+            return false;
+        }//if
+        
+        // 6 - validar cp
+        if (txtCP.getText().trim().length() != 5) {
+            JOptionPane.showMessageDialog(this, 
+                "⚠️ El código postal debe tener 5 dígitos.", 
+                "Validación", JOptionPane.WARNING_MESSAGE);
+            txtCP.requestFocus();
             return false;
         }//if
         
         return true;
-    }//ValidarCampos
+        
+    }//ValidarCamops
 
-    //guardar o actualizar
     private void guardarOActualizar() {
         if (!validarCampos()) return;
         try {
@@ -263,7 +355,7 @@ public class ABCCVistaMiembros extends JPanel{
             m.setCiudad(txtCiudad.getText().trim());
             m.setEstado(txtEstado.getText().trim()); 
             m.setCodigoPostal(txtCP.getText().trim());
-            m.setPais("México"); // Fijo según indicación
+            m.setPais("México");
             m.setCuotaPagada(chkCuotaPagada.isSelected());
             m.setAnoCuota(Integer.parseInt(cmbAño.getSelectedItem().toString()));
 
@@ -271,7 +363,7 @@ public class ABCCVistaMiembros extends JPanel{
                 miembroDAO.actualizar(m) : miembroDAO.guardar(m);
             
             if (exito) { 
-                JOptionPane.showMessageDialog(this, "Operación realizada correctamente."); 
+                JOptionPane.showMessageDialog(this, "✅ Operación realizada correctamente."); 
                 limpiarFormulario(); 
                 cargarDatos(); 
             }//if
@@ -280,13 +372,11 @@ public class ABCCVistaMiembros extends JPanel{
             JOptionPane.showMessageDialog(this, "❌ " + ex.getMessage()); 
         }//Catch
         
-    }//guardarActualizar
+    }//guardar/Actualizar
 
-    //eliminar
     private void eliminar() {
         if (txtId.getText().trim().isEmpty()) { 
-            JOptionPane.showMessageDialog(this, "Selecciona un miembro de la tabla."); 
-            return; 
+            JOptionPane.showMessageDialog(this, "⚠️ Selecciona un miembro de la tabla."); return; 
         }//if
         
         if (JOptionPane.showConfirmDialog(this, 
@@ -294,9 +384,8 @@ public class ABCCVistaMiembros extends JPanel{
                 "Confirmar Baja", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             try {
                 if (miembroDAO.eliminar(Integer.parseInt(txtId.getText().trim()))) {
-                    JOptionPane.showMessageDialog(this, "✅ Baja registrada."); 
-                    limpiarFormulario(); 
-                    cargarDatos();
+                    JOptionPane.showMessageDialog(this, "✅ Baja registrada correctamente."); 
+                    limpiarFormulario(); cargarDatos();
                 }//if
                 
             } catch (Exception ex) { 
@@ -307,7 +396,6 @@ public class ABCCVistaMiembros extends JPanel{
         
     }//eliminar
 
-    // cargar los datos de la fila seleccionada
     private void cargarFilaSeleccionada() {
         int row = tblMiembros.getSelectedRow();
         if (row >= 0) {
@@ -317,9 +405,9 @@ public class ABCCVistaMiembros extends JPanel{
             txtEmail.setText(tblMiembros.getValueAt(row, 3).toString());
             txtTelefono.setText(tblMiembros.getValueAt(row, 4).toString());
         }//if
-    }//CargarFilaSelec
+        
+    }//CargarFilaSeleccionada
 
-    //limpiar
     private void limpiarFormulario() {
         txtId.setText(""); txtNombre.setText(""); txtApellido.setText(""); 
         txtEmail.setText(""); txtTelefono.setText("");
@@ -327,32 +415,6 @@ public class ABCCVistaMiembros extends JPanel{
         txtCiudad.setText(""); txtEstado.setText(""); txtCP.setText("");
         chkCuotaPagada.setSelected(false); cmbAño.setSelectedIndex(0);
         txtNombre.requestFocus();
-    }//limpiarForm
-    
-    //metodo nomas para crear botones con colores pastelito
-    private JButton crearBotonPastel(String texto, Color colorBase, Color colorTexto) {
-        JButton btn = new JButton(texto);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btn.setBackground(colorBase);
-        btn.setForeground(colorTexto);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setMaximumSize(new Dimension(280, 38));
-        btn.setOpaque(true);
-
-        btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                btn.setBackground(colorBase.darker());
-            }//mouseEntered
-            
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                btn.setBackground(colorBase);
-            }//mouseExited
-            
-        });
-        return btn;
-        
-    }//crearBotonPastel
+    }//limpiarFormulario
 
 }//ABCCMiembros
