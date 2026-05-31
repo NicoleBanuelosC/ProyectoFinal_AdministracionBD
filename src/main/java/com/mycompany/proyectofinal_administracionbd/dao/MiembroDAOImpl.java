@@ -21,44 +21,45 @@ import java.util.List;
 public class MiembroDAOImpl implements MiembroDAO{
     
     public boolean guardar(Miembro m) throws Exception {
-        String sql = "{CALL sp_registrar_miembro_completo(?,?,?,?,?,?,?,?,?,?,?,?,?)}";
-        
+        String sql = "{? = call fn_registrar_miembro_completo(?,?,?,?,?,?,?,?,?,?,?)}";
+
         try (CallableStatement stmt = ConexionBD.getConexion().prepareCall(sql)) {
-            stmt.setString(1, m.getNombre());
-            stmt.setString(2, m.getPrimerApellido());
-            stmt.setString(3, m.getSegundoApellido());
-            stmt.setString(4, m.getEmail());
-            stmt.setString(5, m.getTelefono());
-            stmt.setString(6, "Calle Principal");
-            stmt.setString(7, "123");
-            stmt.setString(8, "Centro");
-            stmt.setString(9, "Ciudad");
-            stmt.setString(10, "Estado");
-            stmt.setString(11, "12345");
-            
-            stmt.registerOutParameter(12, Types.INTEGER);
-            stmt.registerOutParameter(13, Types.VARCHAR);
-            
+
+            stmt.registerOutParameter(1, Types.INTEGER);
+
+            stmt.setString(2, m.getNombre());
+            stmt.setString(3, m.getPrimerApellido());
+            stmt.setString(4, m.getSegundoApellido());
+            stmt.setString(5, m.getEmail());
+            stmt.setString(6, m.getTelefono());
+            stmt.setString(7, m.getCalle());
+            stmt.setString(8, m.getNumeroExt());
+            stmt.setString(9, m.getColonia());
+            stmt.setString(10, m.getCiudad());
+            stmt.setString(11, m.getEstado());
+            stmt.setString(12, m.getCodigoPostal());
+
             stmt.execute();
-            
-            int idGenerado = stmt.getInt(12);
+
+            int idGenerado = stmt.getInt(1);
+
             if (idGenerado > 0) {
-                ConexionBD.commit(); 
+                ConexionBD.commit();
                 return true;
                 
             } else {
                 ConexionBD.rollback();
-                throw new SQLException(stmt.getString(13));
+                return false;
             }//else
             
         } catch (SQLException e) {
             ConexionBD.rollback();
-            throw new Exception("Error al guardar miembro: " + e.getMessage());
-        }//catch
+            throw new Exception("Error al guardar: " + e.getMessage());
+        }//cath
         
     }//guardar
     
-    
+   
     public List<Miembro> listarTodos() throws Exception {
         List<Miembro> miembros = new ArrayList<>();
         String sql = "SELECT * FROM vista_miembros_completos ORDER BY id_miembro DESC";
