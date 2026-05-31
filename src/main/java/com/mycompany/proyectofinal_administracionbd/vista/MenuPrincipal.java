@@ -8,7 +8,13 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
-import com.mycompany.proyectofinal_administracionbd.vista.ReportesGraficasVista;
+
+import com.mycompany.proyectofinal_administracionbd.vista.ABCCVistaMiembros;
+import com.mycompany.proyectofinal_administracionbd.vista.ListaObrasVista;
+import com.mycompany.proyectofinal_administracionbd.vista.VentaBoletoVista;
+import com.mycompany.proyectofinal_administracionbd.vista.EstadosFinancierosVista;
+import com.mycompany.proyectofinal_administracionbd.vista.ReporteCuotasVista;
+import com.mycompany.proyectofinal_administracionbd.vista.LoginVista;
 
 /**
  *
@@ -249,8 +255,7 @@ public class MenuPrincipal extends JFrame{
 
         btnObras.addActionListener(e -> {
             pnlContenido.removeAll();
-            pnlContenido.add(new MensajePlaceholder("🎭 Catálogo de Obras", 
-                "Lista de obras disponibles: título, autor, tipo, número de actos"), BorderLayout.CENTER);
+            pnlContenido.add(new ListaObrasVista(), BorderLayout.CENTER);
             pnlContenido.revalidate();
             pnlContenido.repaint();
             actualizarHeader("Catálogo de Obras");
@@ -258,41 +263,39 @@ public class MenuPrincipal extends JFrame{
 
         btnProducciones.addActionListener(e -> {
             pnlContenido.removeAll();
-            pnlContenido.add(new MensajePlaceholder("🎬 Producciones", 
-                "Gestión de producciones: temporada, año, productor, reparto"), BorderLayout.CENTER);
+            pnlContenido.add(new VentaBoletoVista(), BorderLayout.CENTER);
             pnlContenido.revalidate();
             pnlContenido.repaint();
-            actualizarHeader("Producciones");
+            actualizarHeader("Venta Interactiva de Boletos");
         });
 
         btnReportes.addActionListener(e -> {
             pnlContenido.removeAll();
-            pnlContenido.add(new ReportesGraficasVista(), BorderLayout.CENTER); 
+            pnlContenido.add(new EstadosFinancierosVista(), BorderLayout.CENTER);
             pnlContenido.revalidate();
             pnlContenido.repaint();
-            actualizarHeader("Reportes y Gráficas");
+            actualizarHeader("Estados Financieros (Tesorero)");
         });
 
         btnConfigurar.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, 
-                "Configuración del Sistema\n\n" +
-                "Base de Datos: PostgreSQL 18s\n" +
-                "Conexión: Local (teatro_db)\n" +
-                "Usuario: usuario_teatro\n" +
-                "Particionamiento: Activo\n" +
-                "Respaldos: Programados", 
-                "Configuración", JOptionPane.INFORMATION_MESSAGE);
+            pnlContenido.removeAll();
+            pnlContenido.add(new ReporteCuotasVista(), BorderLayout.CENTER);
+            pnlContenido.revalidate();
+            pnlContenido.repaint();
+            actualizarHeader("Reporte de Cuotas Pagadas");
         });
 
         btnSalir.addActionListener(e -> {
             int opcion = JOptionPane.showConfirmDialog(this, 
                 "¿Cerrar sesión y salir del sistema?", 
                 "Confirmar Salida", JOptionPane.YES_NO_OPTION);
+            
             if (opcion == JOptionPane.YES_OPTION) {
                 dispose();
                 new LoginVista().setVisible(true);
-            }//If
+            }//if
         });
+        
     }//agregarEventos
 
    private void actualizarHeader(String modulo) {
