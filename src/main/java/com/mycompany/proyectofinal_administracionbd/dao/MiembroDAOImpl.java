@@ -164,7 +164,7 @@ public class MiembroDAOImpl implements MiembroDAO{
         m.setTelefono(rs.getString("telefono"));
         m.setFechaIngreso(rs.getDate("fecha_ingreso"));
         m.setCuotaPagada(rs.getBoolean("cuota_pagada"));
-        m.setAnoCuota(rs.getInt("ano_cuota"));
+        m.setAnoCuota(rs.getInt("ano_cuota"));  
         return m;
     }//mapearResultSet
       

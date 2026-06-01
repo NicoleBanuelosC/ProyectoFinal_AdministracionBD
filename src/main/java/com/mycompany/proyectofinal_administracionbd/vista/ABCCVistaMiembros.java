@@ -12,23 +12,28 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.DefaultTableModel;
+import java.util.List;
+
 
 /**
  *
  * @author banue
  */
 
-public class ABCCVistaMiembros extends JPanel{
+public class ABCCVistaMiembros extends JPanel {
     
     private final MiembroDAO miembroDAO;
     private final DefaultTableModel modeloTabla;
     private final JTable tblMiembros;
     
-    // Campos del formulario
     private JTextField txtId, txtNombre, txtApellido, txtEmail, txtTelefono;
     private JTextField txtCalle, txtNumeroExt, txtColonia, txtCiudad, txtEstado, txtCP;
     private JCheckBox chkCuotaPagada;
     private JComboBox<String> cmbAño;
+    
+    private JTextField txtBusqueda;
+    private JRadioButton radioId, radioNombre;
+    private ButtonGroup grupoBusqueda;
 
     public ABCCVistaMiembros() {
         setLayout(new BorderLayout(10, 10));
@@ -37,7 +42,7 @@ public class ABCCVistaMiembros extends JPanel{
         
         miembroDAO = new MiembroDAOImpl();
         
-        // encabezados de la tabla
+        // encabezados tabla
         String[] columnas = {"ID", "Nombre", "Apellido", "Email", "Teléfono", "Cuota", "Año"};
         modeloTabla = new DefaultTableModel(columnas, 0);
         tblMiembros = new JTable(modeloTabla);
@@ -45,9 +50,65 @@ public class ABCCVistaMiembros extends JPanel{
         construirInterfaz();
         configurarTAB();
         cargarDatos();
-    }
+    }//public
 
     private void construirInterfaz() {
+        JPanel pnlBusqueda = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
+        pnlBusqueda.setBackground(new Color(240, 248, 255));
+        pnlBusqueda.setBorder(new TitledBorder(
+            new LineBorder(new Color(41, 128, 185), 2),
+            "🔍 Buscar Miembro",
+            TitledBorder.LEFT, TitledBorder.TOP,
+            new Font("Segoe UI", Font.BOLD, 13), new Color(41, 128, 185)));
+        
+        JLabel lblBuscar = new JLabel("Buscar por:");
+        lblBuscar.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        
+        radioId = new JRadioButton("ID");
+        radioId.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        radioId.setBackground(new Color(240, 248, 255));
+        radioId.setSelected(true);
+        
+        radioNombre = new JRadioButton("Nombre");
+        radioNombre.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        radioNombre.setBackground(new Color(240, 248, 255));
+        
+        grupoBusqueda = new ButtonGroup();
+        grupoBusqueda.add(radioId);
+        grupoBusqueda.add(radioNombre);
+        
+        txtBusqueda = new JTextField(20);
+        txtBusqueda.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        txtBusqueda.setPreferredSize(new Dimension(200, 28));
+        
+        JButton btnBuscar = new JButton("🔍 Buscar");
+        btnBuscar.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnBuscar.setBackground(new Color(52, 152, 219));
+        btnBuscar.setForeground(Color.WHITE);
+        btnBuscar.setFocusPainted(false);
+        btnBuscar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnBuscar.addActionListener(e -> buscarMiembro());
+        
+        JButton btnLimpiarBusqueda = new JButton("🧹 Ver Todos");
+        btnLimpiarBusqueda.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnLimpiarBusqueda.setBackground(new Color(149, 165, 166));
+        btnLimpiarBusqueda.setForeground(Color.WHITE);
+        btnLimpiarBusqueda.setFocusPainted(false);
+        btnLimpiarBusqueda.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnLimpiarBusqueda.addActionListener(e -> {
+            txtBusqueda.setText("");
+            cargarDatos();
+        });
+        
+        pnlBusqueda.add(lblBuscar);
+        pnlBusqueda.add(radioId);
+        pnlBusqueda.add(radioNombre);
+        pnlBusqueda.add(txtBusqueda);
+        pnlBusqueda.add(btnBuscar);
+        pnlBusqueda.add(btnLimpiarBusqueda);
+        
+        add(pnlBusqueda, BorderLayout.NORTH);
+
         JPanel pnlTabla = new JPanel(new BorderLayout());
         pnlTabla.setBackground(Color.WHITE);
         pnlTabla.setBorder(new TitledBorder(
@@ -60,15 +121,19 @@ public class ABCCVistaMiembros extends JPanel{
         tblMiembros.setRowHeight(28);
         tblMiembros.setSelectionBackground(new Color(41, 128, 185));
         tblMiembros.setSelectionForeground(Color.WHITE);
+        
         tblMiembros.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tblMiembros.getTableHeader().setBackground(new Color(52, 73, 94));
+        tblMiembros.getTableHeader().setBackground(new Color(44, 62, 80));
         tblMiembros.getTableHeader().setForeground(Color.WHITE);
+        tblMiembros.getTableHeader().setOpaque(true);
         
         pnlTabla.add(new JScrollPane(tblMiembros), BorderLayout.CENTER);
+        
+        add(pnlTabla, BorderLayout.CENTER);
 
         JPanel pnlForm = new JPanel();
         pnlForm.setBackground(Color.WHITE);
-        pnlForm.setPreferredSize(new Dimension(340, 600));
+        pnlForm.setPreferredSize(new Dimension(340, 650));
         pnlForm.setLayout(new BoxLayout(pnlForm, BoxLayout.Y_AXIS));
         pnlForm.setBorder(new TitledBorder(
             new LineBorder(new Color(46, 204, 113), 2), 
@@ -76,26 +141,26 @@ public class ABCCVistaMiembros extends JPanel{
             TitledBorder.LEFT, TitledBorder.TOP, 
             new Font("Segoe UI", Font.BOLD, 13), new Color(46, 204, 113)));
 
-        // id
+        // ID
         pnlForm.add(crearLabel("ID (Auto-generado)"));
         txtId = crearCampoTexto(false);
         pnlForm.add(txtId);
 
+        // nombre - solo letras
         pnlForm.add(crearLabel("Nombre *"));
         txtNombre = crearCampoTexto(true);
         txtNombre.addKeyListener(new KeyAdapter() {
             public void keyTyped(KeyEvent e) {
                 char c = e.getKeyChar();
-                // Solo permite letras, espacios, acentos, ñ y borrar
                 if (!Character.isLetter(c) && !Character.isSpaceChar(c) && 
                     "áéíóúÁÉÍÓÚñÑ".indexOf(c) == -1 && c != KeyEvent.VK_BACK_SPACE) {
                     e.consume();
                 }//if
-            }//voud
-            
+            }//void
         });
         pnlForm.add(txtNombre);
 
+        // epellido - solo letras
         pnlForm.add(crearLabel("Apellido *"));
         txtApellido = crearCampoTexto(true);
         txtApellido.addKeyListener(new KeyAdapter() {
@@ -109,8 +174,24 @@ public class ABCCVistaMiembros extends JPanel{
         });
         pnlForm.add(txtApellido);
 
+        // email  (con @email.com por predeterminado)
         pnlForm.add(crearLabel("Email *"));
         txtEmail = crearCampoTexto(true);
+        txtEmail.setText("@email.com");
+        txtEmail.select(0, 0);
+        txtEmail.addFocusListener(new FocusAdapter() {
+            public void focusGained(FocusEvent e) {
+                if (txtEmail.getText().equals("@email.com")) {
+                    txtEmail.select(0, 0);
+                }//if
+            }//void
+            
+            public void focusLost(FocusEvent e) {
+                if (txtEmail.getText().trim().isEmpty()) {
+                    txtEmail.setText("@email.com");
+                }//if
+            }//void
+        });
         pnlForm.add(txtEmail);
 
         pnlForm.add(crearLabel("Teléfono (10 dígitos)"));
@@ -119,7 +200,7 @@ public class ABCCVistaMiembros extends JPanel{
             public void keyTyped(KeyEvent e) {
                 char c = e.getKeyChar();
                 if (!Character.isDigit(c) && c != KeyEvent.VK_BACK_SPACE) e.consume();
-            }//public
+            }//void
         });
         pnlForm.add(txtTelefono);
 
@@ -136,6 +217,12 @@ public class ABCCVistaMiembros extends JPanel{
 
         pnlForm.add(crearLabel("Número Exterior *"));
         txtNumeroExt = crearCampoTexto(true);
+        txtNumeroExt.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                if (!Character.isDigit(c) && c != KeyEvent.VK_BACK_SPACE) e.consume();
+            }//void
+        });
         pnlForm.add(txtNumeroExt);
 
         pnlForm.add(crearLabel("Colonia *"));
@@ -144,13 +231,31 @@ public class ABCCVistaMiembros extends JPanel{
 
         pnlForm.add(crearLabel("Ciudad *"));
         txtCiudad = crearCampoTexto(true);
+        txtCiudad.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                if (!Character.isLetter(c) && !Character.isSpaceChar(c) && 
+                    c != '.' && c != KeyEvent.VK_BACK_SPACE) {
+                    e.consume();
+                }//if
+            }//void
+        });
         pnlForm.add(txtCiudad);
 
         pnlForm.add(crearLabel("Estado *"));
         txtEstado = crearCampoTexto(true);
+        txtEstado.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+                if (!Character.isLetter(c) && !Character.isSpaceChar(c) && 
+                    c != '.' && c != KeyEvent.VK_BACK_SPACE) {
+                    e.consume();
+                }//if
+            }//void
+        });
         pnlForm.add(txtEstado);
 
-        pnlForm.add(crearLabel("C.P. *"));
+        pnlForm.add(crearLabel("C.P. * (5 dígitos)"));
         txtCP = crearCampoTexto(true);
         txtCP.addKeyListener(new KeyAdapter() {
             public void keyTyped(KeyEvent e) {
@@ -158,10 +263,18 @@ public class ABCCVistaMiembros extends JPanel{
                 if (!Character.isDigit(c) && c != KeyEvent.VK_BACK_SPACE) e.consume();
             }//void
         });
+        txtCP.setDocument(new javax.swing.text.PlainDocument() {
+            public void insertString(int offset, String str, javax.swing.text.AttributeSet attr) 
+                    throws javax.swing.text.BadLocationException {
+                if (getLength() + str.length() <= 5) {
+                    super.insertString(offset, str, attr);
+                }//if
+            }//void
+        });
         pnlForm.add(txtCP);
 
         pnlForm.add(Box.createVerticalStrut(10));
-        chkCuotaPagada = new JCheckBox("Cuota pagada ($50/año)");
+        chkCuotaPagada = new JCheckBox("✅ Cuota pagada ($50/año)");
         chkCuotaPagada.setFont(new Font("Segoe UI", Font.BOLD, 12));
         chkCuotaPagada.setBackground(Color.WHITE);
         pnlForm.add(chkCuotaPagada);
@@ -194,13 +307,9 @@ public class ABCCVistaMiembros extends JPanel{
         pnlForm.add(pnlBtn);
         pnlForm.add(Box.createVerticalGlue());
 
-        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, pnlTabla, pnlForm);
-        split.setDividerLocation(650);
-        split.setResizeWeight(0.7);
-        split.setContinuousLayout(true);
-        add(split, BorderLayout.CENTER);
+        add(pnlForm, BorderLayout.EAST);
 
-        // Eventos
+        // eventos de botones
         btnGuardar.addActionListener(e -> guardarOActualizar());
         btnEliminar.addActionListener(e -> eliminar());
         btnLimpiar.addActionListener(e -> limpiarFormulario());
@@ -208,18 +317,18 @@ public class ABCCVistaMiembros extends JPanel{
             if (getParent() instanceof JFrame f) { 
                 f.dispose(); 
                 new MenuPrincipal().setVisible(true); 
-            }
+            }//if
         });
         
+        // doble click en tabla para cargar datos
         tblMiembros.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) { 
                 if (e.getClickCount() == 2) cargarFilaSeleccionada(); 
-            }//if
+            }//void
         });
-    }//cponstruirInterfaz
+    }//construirInterfaz
 
-    //Métodos extra - auxiliares
-    
+    //Métodos extra - auxiliar
     private JLabel crearLabel(String texto) {
         JLabel lbl = new JLabel(texto);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 12));
@@ -228,7 +337,6 @@ public class ABCCVistaMiembros extends JPanel{
         return lbl;
     }//crearLabel
 
-    //rear campo de texto
     private JTextField crearCampoTexto(boolean editable) {
         JTextField txt = new JTextField();
         txt.setFont(new Font("Segoe UI", Font.PLAIN, 13));
@@ -238,9 +346,8 @@ public class ABCCVistaMiembros extends JPanel{
         txt.setMaximumSize(new Dimension(280, 32));
         txt.setEditable(editable);
         return txt;
-    }//crearCampoTexto
+    }//crear campo de texto
 
-    //botones pastel
     private JButton crearBotonPastel(String texto, Color colorBase, Color colorTexto) {
         JButton btn = new JButton(texto);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
@@ -256,16 +363,17 @@ public class ABCCVistaMiembros extends JPanel{
             public void mouseExited(MouseEvent e) { btn.setBackground(colorBase); }
         });
         return btn;
-    }//botenesPastel
+    }//botones pastel
 
-    private void configurarTAB() {
-        // El orden de add() define el orden de TAB
-    }//ConfigurarTAB
+    private void configurarTAB() {}
 
+    //cargar todos los miembtos
     private void cargarDatos() {
         try {
+            List<Miembro> miembros = miembroDAO.listarTodos();
             modeloTabla.setRowCount(0);
-            for (Miembro m : miembroDAO.listarTodos()) {
+            
+            for (Miembro m : miembros) {
                 modeloTabla.addRow(new Object[]{
                     m.getIdMiembro(), m.getNombre(), m.getPrimerApellido(),
                     m.getEmail(), m.getTelefono(),
@@ -275,13 +383,65 @@ public class ABCCVistaMiembros extends JPanel{
             
         } catch (Exception ex) { 
             JOptionPane.showMessageDialog(this, "Error al cargar: " + ex.getMessage()); 
-        }//Catch
+        }//catch
         
-    }//CargarDatos
+    }//cargarDatos
+    
+    // buscar/consultar
+    private void buscarMiembro() {
+        String texto = txtBusqueda.getText().trim();
+        
+        if (texto.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Ingresa un valor para buscar", "Búsqueda", JOptionPane.WARNING_MESSAGE);
+            return;
+        }//if
+        
+        try {
+            modeloTabla.setRowCount(0);
+            
+            if (radioId.isSelected()) {
+                // buscar por ID
+                try {
+                    int id = Integer.parseInt(texto);
+                    Miembro m = miembroDAO.obtenerPorId(id);
+                    if (m != null) {
+                        modeloTabla.addRow(new Object[]{
+                            m.getIdMiembro(), m.getNombre(), m.getPrimerApellido(),
+                            m.getEmail(), m.getTelefono(),
+                            m.isCuotaPagada() ? "✅ Sí" : "❌ No", m.getAnoCuota()
+                        });
+                    } else {
+                        JOptionPane.showMessageDialog(this, "No se encontró un miembro con ID: " + id);
+                    }//else
+                    
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(this, "El ID debe ser un número válido", "Error", JOptionPane.ERROR_MESSAGE);
+                }//catch
+                
+            } else {
+                // buscar por Nombre
+                List<Miembro> resultados = miembroDAO.buscarPorNombre(texto);
+                if (resultados.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "No se encontraron miembros con ese nombre");
+                } else {
+                    for (Miembro m : resultados) {
+                        modeloTabla.addRow(new Object[]{
+                            m.getIdMiembro(), m.getNombre(), m.getPrimerApellido(),
+                            m.getEmail(), m.getTelefono(),
+                            m.isCuotaPagada() ? "✅ Sí" : "❌ No", m.getAnoCuota()
+                        });
+                    }//for
+                }//else
+                
+            }//else
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error al buscar: " + ex.getMessage());
+        }//catch
+    }//buscarMiembro
 
-    // validar datos
+    // Validaciones de DATOS
     private boolean validarCampos() {
-        // 1 - los campos obligatorios
+        // 1 - campos obligatorios
         if (txtNombre.getText().trim().isEmpty() || txtApellido.getText().trim().isEmpty() || 
             txtEmail.getText().trim().isEmpty() || txtCalle.getText().trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, 
@@ -289,34 +449,33 @@ public class ABCCVistaMiembros extends JPanel{
             return false;
         }//if
         
-        // 2 - validar que el nombre solo tenga letras, espacios y acentos
+        // 2 - nombre (solo letras)
         if (!txtNombre.getText().trim().matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$")) {
             JOptionPane.showMessageDialog(this, 
-                "⚠️ El nombre solo debe contener letras.\nNo se permiten números ni caracteres especiales.", 
-                "Validación", JOptionPane.WARNING_MESSAGE);
+                "⚠️ El nombre solo debe contener letras.", "Validación", JOptionPane.WARNING_MESSAGE);
             txtNombre.requestFocus();
             return false;
         }//if
         
-        // 3 - validar que apellido solo tenga letras, espacios y acentos
+        // 3 - apellido (solo letras)
         if (!txtApellido.getText().trim().matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$")) {
             JOptionPane.showMessageDialog(this, 
-                "⚠️ El apellido solo debe contener letras.\nNo se permiten números ni caracteres especiales.", 
-                "Validación", JOptionPane.WARNING_MESSAGE);
+                "⚠️ El apellido solo debe contener letras.", "Validación", JOptionPane.WARNING_MESSAGE);
             txtApellido.requestFocus();
             return false;
         }//if
         
-        // 4 - validar el email
-        if (!txtEmail.getText().trim().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+        // 4 - email (con @email.com)
+        String email = txtEmail.getText().trim();
+        if (!email.matches("^[\\w-\\.]+@email\\.com$")) {
             JOptionPane.showMessageDialog(this, 
-                "⚠️ Formato de email inválido (ej: usuario@dominio.com).", 
+                "⚠️ El email debe tener el formato: usuario@email.com", 
                 "Validación", JOptionPane.WARNING_MESSAGE);
             txtEmail.requestFocus();
             return false;
         }//if
         
-        // 5 - validar telefono 
+        // 5 - telefono
         if (txtTelefono.getText().trim().length() != 10) {
             JOptionPane.showMessageDialog(this, 
                 "⚠️ El teléfono debe tener exactamente 10 dígitos.", 
@@ -325,19 +484,46 @@ public class ABCCVistaMiembros extends JPanel{
             return false;
         }//if
         
-        // 6 - validar cp
-        if (txtCP.getText().trim().length() != 5) {
+        // 6 - numero ext
+        if (!txtNumeroExt.getText().trim().matches("^\\d+$")) {
             JOptionPane.showMessageDialog(this, 
-                "⚠️ El código postal debe tener 5 dígitos.", 
+                "⚠️ El número exterior solo debe contener números.", 
+                "Validación", JOptionPane.WARNING_MESSAGE);
+            txtNumeroExt.requestFocus();
+            return false;
+        }//if
+        
+        // 7 - ciudad (letras y puntos)
+        if (!txtCiudad.getText().trim().matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s\\.]+$")) {
+            JOptionPane.showMessageDialog(this, 
+                "⚠️ La ciudad solo debe contener letras y puntos.", 
+                "Validación", JOptionPane.WARNING_MESSAGE);
+            txtCiudad.requestFocus();
+            return false;
+        }//if
+        
+        // 8 - estado (letras y puntos)
+        if (!txtEstado.getText().trim().matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s\\.]+$")) {
+            JOptionPane.showMessageDialog(this, 
+                "⚠️ El estado solo debe contener letras y puntos.", 
+                "Validación", JOptionPane.WARNING_MESSAGE);
+            txtEstado.requestFocus();
+            return false;
+        }
+        
+        // 9 - código postal (exactamente 5 dígitos)
+        if (!txtCP.getText().trim().matches("^\\d{5}$")) {
+            JOptionPane.showMessageDialog(this, 
+                "⚠️ El código postal debe tener exactamente 5 dígitos.", 
                 "Validación", JOptionPane.WARNING_MESSAGE);
             txtCP.requestFocus();
             return false;
         }//if
         
         return true;
-        
-    }//ValidarCamops
+    }//validarCampo
 
+    // guardar o actualizar
     private void guardarOActualizar() {
         if (!validarCampos()) return;
         try {
@@ -372,11 +558,12 @@ public class ABCCVistaMiembros extends JPanel{
             JOptionPane.showMessageDialog(this, "❌ " + ex.getMessage()); 
         }//Catch
         
-    }//guardar/Actualizar
+    }//guardarActualizar
 
+    // eliminar
     private void eliminar() {
         if (txtId.getText().trim().isEmpty()) { 
-            JOptionPane.showMessageDialog(this, "⚠️ Selecciona un miembro de la tabla."); return; 
+            JOptionPane.showMessageDialog(this, "⚠️ Selecciona un miembro de la tabla (doble click)."); return; 
         }//if
         
         if (JOptionPane.showConfirmDialog(this, 
@@ -390,12 +577,13 @@ public class ABCCVistaMiembros extends JPanel{
                 
             } catch (Exception ex) { 
                 JOptionPane.showMessageDialog(this, "❌ " + ex.getMessage()); 
-            }//Catch
+            }//catch
             
         }//if
         
     }//eliminar
 
+    //cargar fila con el doble clic
     private void cargarFilaSeleccionada() {
         int row = tblMiembros.getSelectedRow();
         if (row >= 0) {
@@ -404,17 +592,38 @@ public class ABCCVistaMiembros extends JPanel{
             txtApellido.setText(tblMiembros.getValueAt(row, 2).toString());
             txtEmail.setText(tblMiembros.getValueAt(row, 3).toString());
             txtTelefono.setText(tblMiembros.getValueAt(row, 4).toString());
+            
+            //buscar el miembto para pasarle la direccion
+            try {
+                int id = Integer.parseInt(txtId.getText());
+                Miembro m = miembroDAO.obtenerPorId(id);
+                if (m != null) {
+                    txtCalle.setText(m.getCalle() != null ? m.getCalle() : "");
+                    txtNumeroExt.setText(m.getNumeroExt() != null ? m.getNumeroExt() : "");
+                    txtColonia.setText(m.getColonia() != null ? m.getColonia() : "");
+                    txtCiudad.setText(m.getCiudad() != null ? m.getCiudad() : "");
+                    txtEstado.setText(m.getEstado() != null ? m.getEstado() : "");
+                    txtCP.setText(m.getCodigoPostal() != null ? m.getCodigoPostal() : "");
+                    chkCuotaPagada.setSelected(m.isCuotaPagada());
+                    cmbAño.setSelectedItem(String.valueOf(m.getAnoCuota()));
+                }//try
+                
+            } catch (Exception e) {
+                // si no encuentra la dirección, solo carga lo básico
+            }//catch
+            
         }//if
         
-    }//CargarFilaSeleccionada
+    }//cargarFilaSeleccionada
 
+    // limpiar formulario
     private void limpiarFormulario() {
         txtId.setText(""); txtNombre.setText(""); txtApellido.setText(""); 
-        txtEmail.setText(""); txtTelefono.setText("");
+        txtEmail.setText("@email.com"); txtTelefono.setText("");
         txtCalle.setText(""); txtNumeroExt.setText(""); txtColonia.setText(""); 
         txtCiudad.setText(""); txtEstado.setText(""); txtCP.setText("");
         chkCuotaPagada.setSelected(false); cmbAño.setSelectedIndex(0);
         txtNombre.requestFocus();
     }//limpiarFormulario
-
-}//ABCCMiembros
+    
+}//ABCCVistaMiembro
