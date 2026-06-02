@@ -321,10 +321,10 @@ public class ABCCVistaMiembros extends JPanel {
         });
         
         // doble click en tabla para cargar datos
-        tblMiembros.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) { 
-                if (e.getClickCount() == 2) cargarFilaSeleccionada(); 
-            }//void
+        tblMiembros.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) { 
+                cargarFilaSeleccionada();
+            }//If
         });
     }//construirInterfaz
 
