@@ -15,6 +15,7 @@ import com.mycompany.proyectofinal_administracionbd.vista.VentaBoletoVista;
 import com.mycompany.proyectofinal_administracionbd.vista.EstadosFinancierosVista;
 import com.mycompany.proyectofinal_administracionbd.vista.ReporteCuotasVista;
 import com.mycompany.proyectofinal_administracionbd.vista.LoginVista;
+import com.mycompany.proyectofinal_administracionbd.vista.ProduccionVista;  
 
 /**
  *
@@ -190,7 +191,6 @@ public class MenuPrincipal extends JFrame{
         pnlContenido = new JPanel();
         pnlContenido.setLayout(new BorderLayout());
         
-        // Panel de bienvenida por defecto
         pnlWelcome = new JPanel(new GridBagLayout());
         pnlWelcome.setBackground(Color.WHITE);
         pnlWelcome.setBorder(new EmptyBorder(40, 40, 40, 40));
@@ -263,10 +263,10 @@ public class MenuPrincipal extends JFrame{
 
         btnProducciones.addActionListener(e -> {
             pnlContenido.removeAll();
-            pnlContenido.add(new VentaBoletoVista(), BorderLayout.CENTER);
+            pnlContenido.add(new ProduccionVista(), BorderLayout.CENTER); 
             pnlContenido.revalidate();
             pnlContenido.repaint();
-            actualizarHeader("Venta Interactiva de Boletos");
+            actualizarHeader("Producciones (Vista Multitabla)");  
         });
 
         btnReportes.addActionListener(e -> {
