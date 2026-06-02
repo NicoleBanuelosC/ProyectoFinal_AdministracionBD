@@ -121,7 +121,14 @@ public class MiembroDAOImpl implements MiembroDAO{
     }//eliminar
 
     public Miembro obtenerPorId(int idMiembro) throws Exception {
-        String sql = "SELECT * FROM miembro WHERE id_miembro=?";
+        String sql =  "SELECT m.id_miembro, m.nombre, m.primer_apellido, m.segundo_apellido, " +
+                 "m.email, m.telefono, m.fecha_ingreso, m.cuota_pagada, m.ano_cuota, " +
+                 "d.calle, d.numero_ext, d.numero_int, d.colonia, d.ciudad, d.estado, " +
+                 "d.codigo_postal, d.pais " +
+                 "FROM miembro m " +
+                 "LEFT JOIN direccion d ON m.id_direccion = d.id_direccion " +
+                 "WHERE m.id_miembro = ?";
+        
         try (PreparedStatement stmt = ConexionBD.getConexion().prepareStatement(sql)) {
             stmt.setInt(1, idMiembro);
             
@@ -165,6 +172,16 @@ public class MiembroDAOImpl implements MiembroDAO{
         m.setFechaIngreso(rs.getDate("fecha_ingreso"));
         m.setCuotaPagada(rs.getBoolean("cuota_pagada"));
         m.setAnoCuota(rs.getInt("ano_cuota"));  
+        
+        m.setCalle(rs.getString("calle"));
+        m.setNumeroExt(rs.getString("numero_ext"));
+        m.setNumeroInt(rs.getString("numero_int"));
+        m.setColonia(rs.getString("colonia"));
+        m.setCiudad(rs.getString("ciudad"));
+        m.setEstado(rs.getString("estado"));
+        m.setCodigoPostal(rs.getString("codigo_postal"));
+        m.setPais(rs.getString("pais"));
+
         return m;
     }//mapearResultSet
       

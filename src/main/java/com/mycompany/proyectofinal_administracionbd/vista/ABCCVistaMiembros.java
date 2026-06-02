@@ -81,18 +81,20 @@ public class ABCCVistaMiembros extends JPanel {
         txtBusqueda.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         txtBusqueda.setPreferredSize(new Dimension(200, 28));
         
+        
+        
         JButton btnBuscar = new JButton("🔍 Buscar");
         btnBuscar.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btnBuscar.setBackground(new Color(52, 152, 219));
-        btnBuscar.setForeground(Color.WHITE);
+        btnBuscar.setForeground(Color.BLUE);
         btnBuscar.setFocusPainted(false);
         btnBuscar.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnBuscar.addActionListener(e -> buscarMiembro());
         
-        JButton btnLimpiarBusqueda = new JButton("🧹 Ver Todos");
+        JButton btnLimpiarBusqueda = new JButton("Ver Todos");
         btnLimpiarBusqueda.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btnLimpiarBusqueda.setBackground(new Color(149, 165, 166));
-        btnLimpiarBusqueda.setForeground(Color.WHITE);
+        btnLimpiarBusqueda.setForeground(Color.BLUE);
         btnLimpiarBusqueda.setFocusPainted(false);
         btnLimpiarBusqueda.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnLimpiarBusqueda.addActionListener(e -> {
