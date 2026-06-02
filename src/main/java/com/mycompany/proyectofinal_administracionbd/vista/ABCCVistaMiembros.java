@@ -586,35 +586,39 @@ public class ABCCVistaMiembros extends JPanel {
     //cargar fila con el doble clic
     private void cargarFilaSeleccionada() {
         int row = tblMiembros.getSelectedRow();
-        if (row >= 0) {
-            txtId.setText(tblMiembros.getValueAt(row, 0).toString());
-            txtNombre.setText(tblMiembros.getValueAt(row, 1).toString());
-            txtApellido.setText(tblMiembros.getValueAt(row, 2).toString());
-            txtEmail.setText(tblMiembros.getValueAt(row, 3).toString());
-            txtTelefono.setText(tblMiembros.getValueAt(row, 4).toString());
-            
-            //buscar el miembto para pasarle la direccion
-            try {
-                int id = Integer.parseInt(txtId.getText());
-                Miembro m = miembroDAO.obtenerPorId(id);
-                if (m != null) {
-                    txtCalle.setText(m.getCalle() != null ? m.getCalle() : "");
-                    txtNumeroExt.setText(m.getNumeroExt() != null ? m.getNumeroExt() : "");
-                    txtColonia.setText(m.getColonia() != null ? m.getColonia() : "");
-                    txtCiudad.setText(m.getCiudad() != null ? m.getCiudad() : "");
-                    txtEstado.setText(m.getEstado() != null ? m.getEstado() : "");
-                    txtCP.setText(m.getCodigoPostal() != null ? m.getCodigoPostal() : "");
-                    chkCuotaPagada.setSelected(m.isCuotaPagada());
-                    cmbAño.setSelectedItem(String.valueOf(m.getAnoCuota()));
-                }//try
-                
-            } catch (Exception e) {
-                // si no encuentra la dirección, solo carga lo básico
-            }//catch
-            
-        }//if
-        
-    }//cargarFilaSeleccionada
+        if (row < 0) return; // nada seleccionado
+
+        try {
+            // obtener ID de la columna 0
+            Object idObj = tblMiembros.getValueAt(row, 0);
+            if (idObj == null) return;
+            int id = Integer.parseInt(idObj.toString());
+
+            // traer registro completo de la BD
+            Miembro m = miembroDAO.obtenerPorId(id);
+            if (m == null) return;
+
+            // llenar formulario
+            txtId.setText(String.valueOf(m.getIdMiembro()));
+            txtNombre.setText(m.getNombre() != null ? m.getNombre() : "");
+            txtApellido.setText(m.getPrimerApellido() != null ? m.getPrimerApellido() : "");
+            txtEmail.setText(m.getEmail() != null ? m.getEmail() : "");
+            txtTelefono.setText(m.getTelefono() != null ? m.getTelefono() : "");
+
+            txtCalle.setText(m.getCalle() != null ? m.getCalle() : "");
+            txtNumeroExt.setText(m.getNumeroExt() != null ? m.getNumeroExt() : "");
+            txtColonia.setText(m.getColonia() != null ? m.getColonia() : "");
+            txtCiudad.setText(m.getCiudad() != null ? m.getCiudad() : "");
+            txtEstado.setText(m.getEstado() != null ? m.getEstado() : "");
+            txtCP.setText(m.getCodigoPostal() != null ? m.getCodigoPostal() : "");
+
+            chkCuotaPagada.setSelected(m.isCuotaPagada());
+            cmbAño.setSelectedItem(String.valueOf(m.getAnoCuota()));
+
+        } catch (Exception ex) {
+            System.err.println("Error al cargar fila: " + ex.getMessage());
+        }//catch
+    }//CargarFilaSeleccionada
 
     // limpiar formulario
     private void limpiarFormulario() {
