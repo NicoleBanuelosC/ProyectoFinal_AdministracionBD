@@ -562,22 +562,36 @@ public class ABCCVistaMiembros extends JPanel {
 
     // eliminar
     private void eliminar() {
-        if (txtId.getText().trim().isEmpty()) { 
-            JOptionPane.showMessageDialog(this, "⚠️ Selecciona un miembro de la tabla (doble click)."); return; 
-        }//if
-        
-        if (JOptionPane.showConfirmDialog(this, 
-                "¿Eliminar miembro ID " + txtId.getText() + "?", 
-                "Confirmar Baja", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+        String idText = txtId.getText().trim();
+        if (idText.isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "️ Primero selecciona un miembro de la tabla haciendo click sobre el", 
+                "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }//If
+
+        int confirm = JOptionPane.showConfirmDialog(this,
+            "¿Dar de baja al miembro ID: " + idText + "?\nEsta acción es permanente",
+            "Confirmar Eliminación", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+        if (confirm == JOptionPane.YES_OPTION) {
             try {
-                if (miembroDAO.eliminar(Integer.parseInt(txtId.getText().trim()))) {
-                    JOptionPane.showMessageDialog(this, "✅ Baja registrada correctamente."); 
-                    limpiarFormulario(); cargarDatos();
-                }//if
+                int id = Integer.parseInt(idText);
+                if (miembroDAO.eliminar(id)) {
+                    JOptionPane.showMessageDialog(this, "Miembro dado de baja correctamente.");
+                    limpiarFormulario();
+                    cargarDatos(); //se refreca la tabla
+                    
+                } else {
+                    JOptionPane.showMessageDialog(this, "No se pudo eliminar.", "Error", JOptionPane.ERROR_MESSAGE);
+                }//else
                 
-            } catch (Exception ex) { 
-                JOptionPane.showMessageDialog(this, "❌ " + ex.getMessage()); 
-            }//catch
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "ID inválido.", "Error", JOptionPane.ERROR_MESSAGE);
+                
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }//Catch
             
         }//if
         
