@@ -62,7 +62,13 @@ public class MiembroDAOImpl implements MiembroDAO{
    
     public List<Miembro> listarTodos() throws Exception {
         List<Miembro> miembros = new ArrayList<>();
-        String sql = "SELECT * FROM vista_miembros_completos ORDER BY id_miembro DESC";
+            String sql = "SELECT m.id_miembro, m.nombre, m.primer_apellido, m.segundo_apellido, " +
+                 "m.email, m.telefono, m.fecha_ingreso, m.cuota_pagada, m.ano_cuota, " +
+                 "d.calle, d.numero_ext, d.numero_int, d.colonia, d.ciudad, d.estado, " +
+                 "d.codigo_postal, d.pais " +
+                 "FROM miembro m " +
+                 "LEFT JOIN direccion d ON m.id_direccion = d.id_direccion " +
+                 "ORDER BY m.id_miembro DESC";
         
         try (PreparedStatement stmt = ConexionBD.getConexion().prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -143,7 +149,14 @@ public class MiembroDAOImpl implements MiembroDAO{
       
     public List<Miembro> buscarPorNombre(String nombre) throws Exception {
         List<Miembro> resultado = new ArrayList<>();
-        String sql = "SELECT * FROM miembro WHERE nombre ILIKE ? OR primer_apellido ILIKE ?";
+        String sql = "SELECT m.id_miembro, m.nombre, m.primer_apellido, m.segundo_apellido, " +
+                 "m.email, m.telefono, m.fecha_ingreso, m.cuota_pagada, m.ano_cuota, " +
+                 "d.calle, d.numero_ext, d.numero_int, d.colonia, d.ciudad, d.estado, " +
+                 "d.codigo_postal, d.pais " +
+                 "FROM miembro m " +
+                 "LEFT JOIN direccion d ON m.id_direccion = d.id_direccion " +
+                 "WHERE m.nombre ILIKE ? OR m.primer_apellido ILIKE ? " +
+                 "ORDER BY m.id_miembro DESC";
         
         try (PreparedStatement stmt = ConexionBD.getConexion().prepareStatement(sql)) {
             String patron = "%" + nombre.trim() + "%";
