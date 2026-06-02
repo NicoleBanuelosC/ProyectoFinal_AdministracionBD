@@ -13,6 +13,9 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -79,6 +82,16 @@ public class ProduccionVista extends JPanel{
         pnlBtn.add(btnRefrescar);
         add(pnlBtn, BorderLayout.SOUTH);
         
+        // Botón generar boleto
+        JButton btnGenerarBoleto = new JButton("Generar Boleto");
+        btnGenerarBoleto.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnGenerarBoleto.setBackground(new Color(241, 196, 15));
+        btnGenerarBoleto.setForeground(new Color(45, 55, 65));
+        btnGenerarBoleto.setFocusPainted(false);
+        btnGenerarBoleto.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnGenerarBoleto.addActionListener(e -> generarBoleto());
+        pnlBtn.add(btnGenerarBoleto);
+        
     }//construirInterfaz
 
     private void cargarDatos() {
@@ -101,5 +114,57 @@ public class ProduccionVista extends JPanel{
         }//Catch
         
     }//cargarDatos
+    
+    private void generarBoleto() {
+        int filaSeleccionada = tabla.getSelectedRow();
+        if (filaSeleccionada < 0) {
+            JOptionPane.showMessageDialog(this, 
+                "Selecciona una producción de la tabla", 
+                "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }//if
+
+        try {
+            // obtener datos de la fila seleccionada
+            int idProduccion = (int) modelo.getValueAt(filaSeleccionada, 0);
+            String tituloObra = modelo.getValueAt(filaSeleccionada, 1).toString();
+            String temporada = modelo.getValueAt(filaSeleccionada, 4).toString();
+            int anio = (int) modelo.getValueAt(filaSeleccionada, 5);
+
+            // generar número de boleto único
+            String numeroBoleto = "BOL-" + System.currentTimeMillis();
+            LocalDateTime fechaEmision = LocalDateTime.now();
+
+            // Mostrar boleto
+            String mensajeBoleto = String.format(
+                "╔══════════════════════════════════════╗\n" +
+                "║     🎭 TEATRO PLEASANTVILLE         ║\n" +
+                "╠══════════════════════════════════════╣\n" +
+                "║  BOLETO: %-26s  ║\n" +
+                "║                                      ║\n" +
+                "║  Obra: %-28s  ║\n" +
+                "║  Temporada: %-23s  ║\n" +
+                "║  Año: %-29d  ║\n" +
+                "║                                      ║\n" +
+                "║  Fecha de Emisión: %-16s  ║\n" +
+                "║                                      ║\n" +
+                "║  Precio: $250.00                     ║\n" +
+                "║                                      ║\n" +
+                "║  ¡Disfruta la función! 🎭           ║\n" +
+                "╚══════════════════════════════════════╝",
+                numeroBoleto,
+                tituloObra,
+                temporada,
+                anio,
+                fechaEmision.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+            );
+
+            JOptionPane.showMessageDialog(this, mensajeBoleto, "Boleto Generado", JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error al generar boleto: " + e.getMessage());
+        }//Catch
+        
+    }//nererarBoleto
     
 }//ProduccionVista
