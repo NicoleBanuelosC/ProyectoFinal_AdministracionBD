@@ -81,7 +81,27 @@ public class ABCCVistaMiembros extends JPanel {
         txtBusqueda.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         txtBusqueda.setPreferredSize(new Dimension(200, 28));
         
-        
+        txtBusqueda.addKeyListener(new KeyAdapter() {
+            public void keyTyped(KeyEvent e) {
+                char c = e.getKeyChar();
+
+                if (radioId.isSelected()) {
+                    // Si busca por ID solo números se permiten
+                    if (!Character.isDigit(c) && c != KeyEvent.VK_BACK_SPACE) {
+                        e.consume();
+                    }//if
+                    
+                } else if (radioNombre.isSelected()) {
+                    // Si busca por nombre solo letras, espacios y acentos
+                    if (!Character.isLetter(c) && !Character.isSpaceChar(c) && 
+                        "áéíóúÁÉÍÓÚñÑ".indexOf(c) == -1 && c != KeyEvent.VK_BACK_SPACE) {
+                        e.consume();
+                    }//if
+                    
+                }//else
+                
+            }//public void 
+        });
         
         JButton btnBuscar = new JButton("🔍 Buscar");
         btnBuscar.setFont(new Font("Segoe UI", Font.BOLD, 12));
