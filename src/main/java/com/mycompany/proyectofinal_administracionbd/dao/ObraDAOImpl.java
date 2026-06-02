@@ -18,7 +18,7 @@ import java.util.List;
 public class ObraDAOImpl implements ObraDAO{
     
     public boolean guardar(Obra obra) throws Exception {
-        String sql = "INSERT INTO obra (titulo, autor, tipo, numero_actos) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO obra (titulo, autor, tipo, numero_actos) VALUES (?, ?, ?::tipo_obra_enum, ?)";
         try (PreparedStatement stmt = ConexionBD.getConexion().prepareStatement(sql)) {
             stmt.setString(1, obra.getTitulo());
             stmt.setString(2, obra.getAutor());
@@ -49,8 +49,7 @@ public class ObraDAOImpl implements ObraDAO{
     }//listarTodos
 
     public boolean actualizar(Obra obra) throws Exception {
-        String sql = "UPDATE obra SET titulo=?, autor=?, tipo=?, numero_actos=? WHERE id_obra=?";
-        try (PreparedStatement stmt = ConexionBD.getConexion().prepareStatement(sql)) {
+        String sql = "UPDATE obra SET titulo=?, autor=?, tipo=?::tipo_obra_enum, numero_actos=? WHERE id_obra=?";        try (PreparedStatement stmt = ConexionBD.getConexion().prepareStatement(sql)) {
             stmt.setString(1, obra.getTitulo());
             stmt.setString(2, obra.getAutor());
             stmt.setString(3, obra.getTipo());
