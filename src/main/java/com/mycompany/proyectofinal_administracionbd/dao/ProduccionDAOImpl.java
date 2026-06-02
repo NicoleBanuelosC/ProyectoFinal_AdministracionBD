@@ -23,9 +23,20 @@ public List<Produccion> listarVistaCompleta() throws Exception {
     List<Produccion> lista = new ArrayList<>();
     String sql = "SELECT * FROM vista_producciones_completas";
     
+    System.out.println("DEBUG: Ejecutando vista: " + sql);
+    
     try {
+        // Limpiar conexión antes de consultar (por si estaba "abortada")
+        if (ConexionBD.getConexion().getAutoCommit() == false) {
+            try {
+                ConexionBD.getConexion().rollback();
+            } catch (SQLException ignore) {}
+        }//if
+        
         try (PreparedStatement stmt = ConexionBD.getConexion().prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
+            
+            int contador = 0;
             while (rs.next()) {
                 Produccion p = new Produccion();
                 p.setIdProduccion(rs.getInt("id_produccion"));
@@ -33,40 +44,24 @@ public List<Produccion> listarVistaCompleta() throws Exception {
                 p.setAutorObra(rs.getString("autor_obra"));
                 p.setTipoObra(rs.getString("tipo_obra"));
                 p.setTemporada(rs.getString("temporada"));
-                p.setAño(rs.getInt("año"));
+                p.setAño(rs.getInt("anio"));  // sin ñ para que coincida
                 p.setNombreProductor(rs.getString("nombre_productor"));
                 lista.add(p);
+                contador++;
             }//while
-        }//try
-        
-    } catch (SQLException e) {
-        // Si la transacción está abortada, limpiar y reintentar
-        if (e.getMessage().contains("aborted") || e.getMessage().contains("abortada")) {
-            ConexionBD.rollback(); // limpia el estado de la conexión
-            // reintentar la consulta
-            try (PreparedStatement stmt = ConexionBD.getConexion().prepareStatement(sql);
-                 ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Produccion p = new Produccion();
-                    p.setIdProduccion(rs.getInt("id_produccion"));
-                    p.setTituloObra(rs.getString("titulo_obra"));
-                    p.setAutorObra(rs.getString("autor_obra"));
-                    p.setTipoObra(rs.getString("tipo_obra"));
-                    p.setTemporada(rs.getString("temporada"));
-                    p.setAño(rs.getInt("año"));
-                    p.setNombreProductor(rs.getString("nombre_productor"));
-                    lista.add(p);
-                }//While
-            }//try
             
-        } else {
-            throw e;
-        }//else
-        
-    }//cathc
+            System.out.println("DEBUG: Se cargaron " + contador + " producciones");
+            
+        }//try
+    } catch (SQLException e) {
+        System.err.println("ERROR SQL: " + e.getMessage());
+        System.err.println("SQL State: " + e.getSQLState());
+        ConexionBD.rollback();
+        throw new Exception("Error al cargar producciones: " + e.getMessage(), e);
+    }//Catch
     
     return lista;
-}//listarVistCompleta
+}//listarVistaCompleta
 
     public boolean guardar(Produccion p) throws Exception {
         String sql = "INSERT INTO produccion (id_obra, temporada, año, id_productor) VALUES (?, ?::temporada_enum, ?, ?)";
