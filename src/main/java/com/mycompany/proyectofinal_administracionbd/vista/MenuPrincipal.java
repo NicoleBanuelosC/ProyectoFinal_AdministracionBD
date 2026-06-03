@@ -261,12 +261,12 @@ public class MenuPrincipal extends JFrame{
             actualizarHeader("Catálogo de Obras");
         });
 
-        btnProducciones.addActionListener(e -> {
+        btnReportes.addActionListener(e -> {
             pnlContenido.removeAll();
-            pnlContenido.add(new ProduccionVista(), BorderLayout.CENTER); 
+            pnlContenido.add(new GraficaVista(), BorderLayout.CENTER); 
             pnlContenido.revalidate();
             pnlContenido.repaint();
-            actualizarHeader("Producciones (Vista Multitabla)");  
+            actualizarHeader("Reportes y Gráficas");
         });
 
         btnReportes.addActionListener(e -> {
