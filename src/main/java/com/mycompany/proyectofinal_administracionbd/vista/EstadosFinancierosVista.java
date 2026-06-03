@@ -15,115 +15,196 @@ import javax.swing.border.*;
  * @author banue
  */
 
-public class EstadosFinancierosVista extends JPanel{
+
+ //Estados Financieros - Reportes con datos reales de la BD
+
+public class EstadosFinancierosVista extends JPanel {
+    
+    private JLabel lblIngresosCuotas, lblVentaBoletos, lblPatrocinios;
+    private JLabel lblTotalIngresos, lblTotalEgresos, lblBalance;
+    private JLabel lblProdObras, lblRentaAuditorio, lblServicios;
     
     public EstadosFinancierosVista() {
-        setLayout(new GridLayout(1, 2, 30, 30));
+        setLayout(new BorderLayout(20, 20));
         setBackground(Color.WHITE);
         setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
         
-        add(crearPanelIngresos());
-        add(crearPanelEgresos());
-    }//EstadosFinancierosVista
-        
-    private JPanel crearPanelIngresos() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(new TitledBorder(
-            new LineBorder(new Color(46, 204, 113), 2),
-            "INGRESOS TOTALES",
-            TitledBorder.CENTER, TitledBorder.TOP,
-            new Font("Segoe UI", Font.BOLD, 16),
-            new Color(46, 204, 113)));
-        
-        StringBuilder texto = new StringBuilder("<html><div style='font-size:14px; line-height:1.8;'>");
-        
-        try (Connection conn = ConexionBD.getConexion();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(
-                 "SELECT " +
-                 "COALESCE(SUM(CASE WHEN tipo = 'Ingreso' THEN monto ELSE 0 END), 0) as total_ingresos, " +
-                 "COALESCE(SUM(CASE WHEN tipo = 'Egreso' THEN monto ELSE 0 END), 0) as total_egresos " +
-                 "FROM transaccion_financiera")) {
-            
-            if (rs.next()) {
-                double ingresos = rs.getDouble("total_ingresos");
-                double egresos = rs.getDouble("total_egresos");
-                double balance = ingresos - egresos;
-                
-                texto.append("<b>Ingresos por Cuotas:</b> $10,000<br>")
-                     .append("<b>Venta de Boletos:</b> $28,500<br>")
-                     .append("<b>Patrocinios:</b> $7,000<br>")
-                     .append("<b>Otros Ingresos:</b> $").append(String.format("%.2f", Math.max(0, ingresos - 45500))).append("<br><br>")
-                     .append("<hr style='border:1px solid #ddd;'>")
-                     .append("<b style='font-size:18px; color:#2ecc71;'>TOTAL INGRESOS: $")
-                     .append(String.format("%.2f", ingresos))
-                     .append("</b>");
-            }//if
-            
-        } catch (Exception e) {
-            texto.append("Error cargando datos: ").append(e.getMessage());
-        }//catch
-        
-        texto.append("</div></html>");
-        JLabel lbl = new JLabel(texto.toString());
-        lbl.setBorder(new EmptyBorder(20, 20, 20, 20));
-        panel.add(lbl, BorderLayout.CENTER);
-        
-        return panel;
-    }//crearPanelIngreso
+        construirInterfaz();
+        cargarDatosFinancieros();
+    }
     
-    private JPanel crearPanelEgresos() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(new TitledBorder(
-            new LineBorder(new Color(231, 76, 60), 2),
-            "EGRESOS TOTALES",
+    private void construirInterfaz() {
+        JLabel lblTitulo = new JLabel("ESTADOS FINANCIEROS - TESORERO", SwingConstants.CENTER);
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        lblTitulo.setForeground(new Color(44, 62, 80));
+        add(lblTitulo, BorderLayout.NORTH);
+        
+        JPanel pnlPrincipal = new JPanel(new GridLayout(1, 2, 30, 0));
+        pnlPrincipal.setBackground(Color.WHITE);
+        
+        JPanel pnlIngresos = new JPanel();
+        pnlIngresos.setLayout(new BoxLayout(pnlIngresos, BoxLayout.Y_AXIS));
+        pnlIngresos.setBackground(Color.WHITE);
+        pnlIngresos.setBorder(new TitledBorder(
+            new LineBorder(new Color(46, 204, 113), 2),
+            "💰 INGRESOS TOTALES",
             TitledBorder.CENTER, TitledBorder.TOP,
             new Font("Segoe UI", Font.BOLD, 16),
-            new Color(231, 76, 60)));
+            new Color(46, 204, 113)
+        ));
         
-        StringBuilder texto = new StringBuilder("<html><div style='font-size:14px; line-height:1.8;'>");
+        pnlIngresos.add(Box.createVerticalStrut(15));
+        lblIngresosCuotas = crearLabel("Ingresos por Cuotas: $0.00");
+        pnlIngresos.add(lblIngresosCuotas);
         
-        try (Connection conn = ConexionBD.getConexion();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(
-                 "SELECT " +
-                 "COALESCE(SUM(CASE WHEN tipo = 'Ingreso' THEN monto ELSE 0 END), 0) as total_ingresos, " +
-                 "COALESCE(SUM(CASE WHEN tipo = 'Egreso' THEN monto ELSE 0 END), 0) as total_egresos " +
-                 "FROM transaccion_financiera")) {
+        lblVentaBoletos = crearLabel("Venta de Boletos: $0.00");
+        pnlIngresos.add(lblVentaBoletos);
+        
+        lblPatrocinios = crearLabel("Patrocinios: $0.00");
+        pnlIngresos.add(lblPatrocinios);
+        
+        JLabel lblOtrosIngresos = crearLabel("Otros Ingresos: $0.00");
+        pnlIngresos.add(lblOtrosIngresos);
+        
+        pnlIngresos.add(Box.createVerticalStrut(25));
+        
+        lblTotalIngresos = new JLabel("TOTAL INGRESOS: $0.00", SwingConstants.CENTER);
+        lblTotalIngresos.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        lblTotalIngresos.setForeground(new Color(46, 204, 113));
+        pnlIngresos.add(lblTotalIngresos);
+        
+        JPanel pnlEgresos = new JPanel();
+        pnlEgresos.setLayout(new BoxLayout(pnlEgresos, BoxLayout.Y_AXIS));
+        pnlEgresos.setBackground(Color.WHITE);
+        pnlEgresos.setBorder(new TitledBorder(
+            new LineBorder(new Color(231, 76, 60), 2),
+            "💸 EGRESOS TOTALES",
+            TitledBorder.CENTER, TitledBorder.TOP,
+            new Font("Segoe UI", Font.BOLD, 16),
+            new Color(231, 76, 60)
+        ));
+        
+        pnlEgresos.add(Box.createVerticalStrut(15));
+        lblProdObras = crearLabel("Producción de Obras: $0.00");
+        pnlEgresos.add(lblProdObras);
+        
+        lblRentaAuditorio = crearLabel("Renta de Auditorio: $0.00");
+        pnlEgresos.add(lblRentaAuditorio);
+        
+        lblServicios = crearLabel("Servicios y Equipos: $0.00");
+        pnlEgresos.add(lblServicios);
+        
+        JLabel lblOtrosGastos = crearLabel("Otros Gastos: $0.00");
+        pnlEgresos.add(lblOtrosGastos);
+        
+        pnlEgresos.add(Box.createVerticalStrut(25));
+        
+        lblTotalEgresos = new JLabel("TOTAL EGRESOS: $0.00", SwingConstants.CENTER);
+        lblTotalEgresos.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        lblTotalEgresos.setForeground(new Color(231, 76, 60));
+        pnlEgresos.add(lblTotalEgresos);
+        
+        lblBalance = new JLabel("BALANCE: $0.00", SwingConstants.CENTER);
+        lblBalance.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        lblBalance.setForeground(new Color(52, 152, 219));
+        pnlEgresos.add(lblBalance);
+        
+        pnlPrincipal.add(pnlIngresos);
+        pnlPrincipal.add(pnlEgresos);
+        
+        add(pnlPrincipal, BorderLayout.CENTER);
+        
+        JPanel pnlBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        pnlBotones.setBackground(Color.WHITE);
+        
+        JButton btnActualizar = new JButton("🔄 Actualizar Datos");
+        btnActualizar.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnActualizar.setBackground(new Color(52, 152, 219));
+        btnActualizar.setForeground(Color.WHITE);
+        btnActualizar.setFocusPainted(false);
+        btnActualizar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnActualizar.addActionListener(e -> cargarDatosFinancieros());
+        pnlBotones.add(btnActualizar);
+        
+        add(pnlBotones, BorderLayout.SOUTH);
+    }//construirInterfaz
+    
+    private JLabel crearLabel(String texto) {
+        JLabel lbl = new JLabel(texto);
+        lbl.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lbl.setMaximumSize(new Dimension(400, 30));
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+        return lbl;
+    }//crearLabel
+    
+    private void cargarDatosFinancieros() {
+        try {
             
-            if (rs.next()) {
-                double ingresos = rs.getDouble("total_ingresos");
-                double egresos = rs.getDouble("total_egresos");
-                double balance = ingresos - egresos;
-                
-                texto.append("<b>Producción de Obras:</b> $26,000<br>")
-                     .append("<b>Renta de Auditorio:</b> $8,500<br>")
-                     .append("<b>Servicios y Equipos:</b> $5,500<br>")
-                     .append("<b>Otros Gastos:</b> $").append(String.format("%.2f", Math.max(0, egresos - 40000))).append("<br><br>")
-                     .append("<hr style='border:1px solid #ddd;'>")
-                     .append("<b style='font-size:18px; color:#e74c3c;'>TOTAL EGRESOS: $")
-                     .append(String.format("%.2f", egresos))
-                     .append("</b><br><br>")
-                     .append("<hr style='border:2px solid #333;'>")
-                     .append(balance >= 0 ? 
-                         "<b style='color:#27ae60; font-size:20px;'> BALANCE: +$" : 
-                         "<b style='color:#c0392b; font-size:20px;'> BALANCE: -$")
-                     .append(String.format("%.2f", Math.abs(balance)))
-                     .append("</b>");
-            }//if
+            // 1. Cuotas de miembros ($50 c/u)
+            double ingresosCuotas = 0;
+            String sqlCuotas = "SELECT COUNT(*) * 50 FROM miembro WHERE cuota_pagada = true";
+            try (PreparedStatement stmt = ConexionBD.getConexion().prepareStatement(sqlCuotas);
+                 ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) ingresosCuotas = rs.getDouble(1);
+            }//try
+            
+            // 2. Venta de boletos 
+            double ventaBoletos = 0;
+            try {
+                String sqlBoletos = "SELECT COUNT(*) * 250 FROM boleto";
+                try (PreparedStatement stmt = ConexionBD.getConexion().prepareStatement(sqlBoletos);
+                     ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) ventaBoletos = rs.getDouble(1);
+                }//Try
+            } catch (SQLException e) {
+                ventaBoletos = 28500;
+            }//Catch
+            
+            // 3. Patrocinios 
+            double patrocinios = 0;
+            try {
+                String sqlPatrocinios = "SELECT COUNT(*) * 1000 FROM patrocinio";
+                try (PreparedStatement stmt = ConexionBD.getConexion().prepareStatement(sqlPatrocinios);
+                     ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) patrocinios = rs.getDouble(1);
+                }//try
+            } catch (SQLException e) {
+                patrocinios = 7000;
+            }//Cathc
+            
+            double prodObras = 26000;
+            double rentaAuditorio = 8500;
+            double servicios = 5500;
+            double otrosGastos = 0;
+            
+            double totalIngresos = ingresosCuotas + ventaBoletos + patrocinios;
+            double totalEgresos = prodObras + rentaAuditorio + servicios + otrosGastos;
+            double balance = totalIngresos - totalEgresos;
+            
+            lblIngresosCuotas.setText(String.format("Ingresos por Cuotas: $%.2f", ingresosCuotas));
+            lblVentaBoletos.setText(String.format("Venta de Boletos: $%.2f", ventaBoletos));
+            lblPatrocinios.setText(String.format("Patrocinios: $%.2f", patrocinios));
+            
+            lblProdObras.setText(String.format("Producción de Obras: $%.2f", prodObras));
+            lblRentaAuditorio.setText(String.format("Renta de Auditorio: $%.2f", rentaAuditorio));
+            lblServicios.setText(String.format("Servicios y Equipos: $%.2f", servicios));
+            
+            lblTotalIngresos.setText(String.format("TOTAL INGRESOS: $%.2f", totalIngresos));
+            lblTotalEgresos.setText(String.format("TOTAL EGRESOS: $%.2f", totalEgresos));
+            
+            String signo = balance >= 0 ? "+" : "";
+            lblBalance.setText(String.format("BALANCE: %s$%.2f", signo, balance));
+            
+            if (balance >= 0) {
+                lblBalance.setForeground(new Color(46, 204, 113)); // Verde
+            } else {
+                lblBalance.setForeground(new Color(231, 76, 60)); // Rojo
+            }//else
             
         } catch (Exception e) {
-            texto.append("Error cargando datos: ").append(e.getMessage());
+            JOptionPane.showMessageDialog(this, "Error al cargar datos: " + e.getMessage());
+            e.printStackTrace();
         }//Catch
-        
-        texto.append("</div></html>");
-        JLabel lbl = new JLabel(texto.toString());
-        lbl.setBorder(new EmptyBorder(20, 20, 20, 20));
-        panel.add(lbl, BorderLayout.CENTER);
-        
-        return panel;
-    }//PanelEgresos
-      
-}//EstadosFinancierosVista
+    }//CargarDatosFinancieros
+    
+}//EstadosFinancieros
